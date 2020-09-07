@@ -3,6 +3,8 @@ Compile frei0r suitable for windows system.
 
 Modified water filter, can run on windows system.
 
+ffplay -i sample.mp4 -vf "frei0r=water:2|1|1|1|0|0|30/30"
+
   f0r_param_double physics;
   
   f0r_param_bool swirl;
