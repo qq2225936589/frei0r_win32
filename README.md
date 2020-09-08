@@ -3,7 +3,7 @@ Compile frei0r suitable for windows system.
 
 Modified water filter, can run on windows system.
 
-ffplay -i sample.mp4 -vf "frei0r=water:2|1|1|1|0|0|30/30"
+ffplay -i sample.mp4 -vf "frei0r=water:1|1|1|1|0|0|30/30"
 
   f0r_param_double physics;
   
@@ -19,7 +19,7 @@ ffplay -i sample.mp4 -vf "frei0r=water:2|1|1|1|0|0|30/30"
   
   f0r_param_position position;
   
-  register_param(physics, "physics", "water density: from 1 to 4");
+  register_param(physics, "physics", "water density: from 0.0 to 1.0");
   
   register_param(swirl, "swirl", "swirling whirpool in the center");
   
