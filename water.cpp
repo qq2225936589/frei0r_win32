@@ -72,9 +72,10 @@ public:
   f0r_param_bool smooth;
   f0r_param_bool distort;
   f0r_param_position position;
+  //bool randomize_swirl;
 
   Water(unsigned int width, unsigned int height) {
-    physics = 2.0;
+    physics = 1.0;
     swirl = 1;
     rain = 0;
     surfer = 0;
@@ -82,13 +83,14 @@ public:
     smooth = 0;
     position.x = 0;
     position.y = 0;
-    register_param(physics, "physics", "water density: from 1 to 4");
+    register_param(physics, "physics", "water density: from 0.0 to 1.0");
     register_param(swirl, "swirl", "swirling whirpool in the center");
     register_param(rain, "rain", "rain drops all over");
     register_param(surfer, "surfer", "surf the surface with a wandering finger");
     register_param(smooth, "smooth", "smooth up all perturbations on the surface");
     register_param(distort, "distort", "distort all surface like dropping a bucket to the floor");
     register_param(position, "position", "swirl position coordinate, Relative center coordinate");
+    //register_param(randomize_swirl, "randomize_swirl", "randomize the swirling angle");
 
     Hpage = 0;
     ox = 80;
@@ -114,10 +116,10 @@ public:
     geo = new ScreenGeometry();
     geo->w = width;
     geo->h = height;
-    geo->size =  width*height*sizeof(uint32_t);
+    geo->size =  width*(height+1)*sizeof(uint32_t);
 
     water_surfacesize = geo->size;
-    calc_optimization = (height-1)*(width);
+    calc_optimization = (height)*(width);
     
     xang = fastrand()%2048;
     yang = fastrand()%2048;
@@ -125,8 +127,8 @@ public:
     
     /* buffer allocation tango */
     if ( width*height > 0 ) {
-        Height[0] = (uint32_t*)calloc(width*height, sizeof(uint32_t));
-        Height[1] = (uint32_t*)calloc(width*height, sizeof(uint32_t));
+        Height[0] = (uint32_t*)calloc(width*(height+1), sizeof(uint32_t));
+        Height[1] = (uint32_t*)calloc(width*(height+1), sizeof(uint32_t));
     }
     if ( geo->size > 0 ) {
         BkGdImagePre = (uint32_t*) malloc(geo->size);
@@ -412,32 +414,26 @@ void Water::water_3swirls() {
 void Water::DrawWater(int page,uint32_t* out) {
   int dx, dy;
   int x, y;
-  int c;
   uint32_t offset=geo->w + 1;
   uint32_t newoffset;
   int *ptr = (int*)&Height[page][0];
+  int maxoffset=geo->size/sizeof(uint32_t);
   
-  for (y = calc_optimization; offset < y; offset += 2) {
+  for (y = calc_optimization; offset < y; offset+=2) {
     for (x = offset+geo->w-2; offset < x; offset++) {
-        
+
       dx = ptr[offset] - ptr[offset+1];
       dy = ptr[offset] - ptr[offset+geo->w];
       newoffset = offset + geo->w*(dy>>3) + (dx>>3);
-      if(newoffset<geo->size/sizeof(uint32_t) && offset<(geo->w)*(geo->h))
-      {
-        c = BkGdImage[newoffset];
-        out[offset] = c;
-      }
+      if(newoffset<maxoffset)
+        out[offset] = BkGdImage[newoffset];
       offset++;
-      
+
       dx = ptr[offset] - ptr[offset+1];
       dy = ptr[offset] - ptr[offset+geo->w];
       newoffset = offset + geo->w*(dy>>3) + (dx>>3);
-      if(newoffset<geo->size/sizeof(uint32_t) && offset<(geo->w)*(geo->h))
-      {
-        c = BkGdImage[newoffset];
-        out[offset] = c;
-      }
+      if(newoffset<maxoffset)
+        out[offset] = BkGdImage[newoffset];
     }
   }
 }
